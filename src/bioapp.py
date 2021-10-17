@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask.wrappers import Response
-from flask_restplus import Api, Resource
+from flask_restx import Api, Resource
 from flask_pymongo import PyMongo, ObjectId
 from bson import json_util
 from flask_cors import CORS
@@ -93,5 +93,6 @@ def not_found(error=None):
     response.status_code = 404
     return response
 ##################################################
+
 if __name__ == '__main__':
     bioapp.run(debug = True, port=4000)

@@ -1,4 +1,4 @@
-from flask_restplus import Resource, Namespace
+from flask_restx import Resource, Namespace
 import json
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, Response
