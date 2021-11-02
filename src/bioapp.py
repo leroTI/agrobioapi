@@ -5,9 +5,9 @@ from flask_pymongo import PyMongo, ObjectId
 from bson import json_util
 from flask_cors import CORS
 from bson.objectid import ObjectId
-from controllers import connect
+from controllers import connect, ingredientns,products
 from dbmongo.mongoconnect import db
-import controllers.ingredientcontroller as ingredient 
+
 
 bioapp = Flask(__name__)
 CORS(bioapp)
@@ -20,6 +20,8 @@ api = Api(
     )
 
 api.add_namespace(connect)
+api.add_namespace(ingredientns)
+api.add_namespace(products)
 # @api.route('/connect',methods=['GET'])
 # class ping(Resource):
 #     def connect(self):
@@ -42,7 +44,7 @@ api.add_namespace(connect)
 # def delete(id):    
 #     _ingredient = ingredient.delete(id)
 #     if _ingredient:
-#         response = jsonify({'message':'Ingrediente eliminado correctamente.', "id": str(id), "status_code": 200}) 
+#         response = jsonify({'message':'Ingrediente elimnado correctamente.', "id": str(id), "status_code": 200}) 
 #         return response
 #     else:
 #         return not_found()
@@ -74,12 +76,12 @@ api.add_namespace(connect)
 #     return Response(ingredients, mimetype='application/json')
 
 
-@api.route('/ping')
-class Ping(Resource):
-    def get(self):
-        response = jsonify({"message":"pong!"})
-        response.status_code = 200
-        return response
+# @api.route('/ping')
+# class Ping(Resource):
+#     def get(self):
+#         response = jsonify({"message":"pong!"})
+#         response.status_code = 200
+#         return response
             
 
 

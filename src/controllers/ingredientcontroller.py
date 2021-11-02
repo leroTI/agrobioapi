@@ -1,70 +1,108 @@
 from flask_restx import Resource, Namespace
 import json
 from datetime import datetime, timedelta
-from flask import Flask, jsonify, Response
+from flask import Flask, jsonify, Response, request
 from flask_pymongo import PyMongo, ObjectId
 from pymongo.message import query
 from werkzeug.datastructures import ContentSecurityPolicy
 from dbmongo.mongoconnect import db
 from bson import json_util
-from datetime import datetime
+from .namespaces import ingredientns
 
-# ingredient = Namespace('ingredients') 
+@ingredientns.route('/create')
+class create(Resource):
+    def post(self):
+        name:str = request.json['name']
+        kgContainer:float = request.json['kgContainer']
+        price:float=request.json['price']
+        quantity:float = 0
+        id = db.ingredients.insert({
+            'name':name,
+            'kgContainer':kgContainer,
+            'price':price,
+            'quantity':quantity
+        })
+        response = jsonify({'message':'Operación Completada', "id": str(id), "status_code": 200})
+        return Response(response, mimetype='application/json')
 
-# class ingredient(Resource):
-def create(name:str, kgContainer:float, price:float, quantity:float):
-    id = db.ingredients.insert({
-        'name':name,
-        'kgContainer':kgContainer,
-        'price':price,
-        'quantity':quantity
-    })
-    response = jsonify({'message':'Operación Completada', "id": str(id), "status_code": 200})
-    return response
+@ingredientns.route('/update')
+class update(Resource):
+    def put(self):
+        id:str=(request.json['id'])['$oid']
+        name:str = request.json['name']
+        kgContainer:float = request.json['kgContainer']
+        price:float=request.json['price']
 
-def update(id:str,name:str, kgContainer:float, price:float):
-    ingredient = db.ingredients.find_one_and_update({ '_id': ObjectId(id) }, { "$set":{
-        'name':name,
-        'kgContainer':kgContainer,
-        'price':price
-    }
-    })
-    return ingredient
+        ingredient = db.ingredients.find_one_and_update({ '_id': ObjectId(id) }, { "$set":{
+            'name':name,
+            'kgContainer':kgContainer,
+            'price':price
+        }
+        })
+        response = jsonify({'message':'Ingrediente actualizado correctamente.', "id": str(request.json['id']), "status_code": 200}) 
+        return response
 
-def delete(id:str):
-    return db.ingredients.find_one_and_delete({ '_id': ObjectId(id) })
+@ingredientns.route('/delete')
+class delete(Resource):
+    @ingredientns.param('id', 'object_id del ingrediente a eliminar', required=True)
+    def delete(self):
+        id:str= str(request.args['id']) 
+        db.ingredients.find_one_and_delete({ '_id': ObjectId(id) })
+        response = jsonify({'message':'Ingrediente elimnado correctamente.', "id": str(id), "status_code": 200}) 
+        return response
 
-def get_ingredients():
-    ingredients = db.ingredients.find()
-    return json_util.dumps(ingredients)
+@ingredientns.route('/getall')
+class get_ingredients(Resource):
+    def get(self):
+        ingredients = db.ingredients.find()
+        return Response(json_util.dumps(ingredients), mimetype='application/json')
 
-def get_ingredients_by_name(name):
-    query = { "$where": "this.name.toLowerCase().indexOf('"+name+"') >= 0" }
-    ingredients = db.ingredients.find(query)
-    response = json_util.dumps(ingredients)
-    return Response(response, mimetype='application/json')
+@ingredientns.route('/get')
+class get_ingredients_by_name(Resource):
+    @ingredientns.param('name', 'Nombre del ingrediente', required=True)
+    def get(selft):
+        name:str= str(request.args['name'])
+        query = { "$where": "this.name.toLowerCase().indexOf('"+name+"') >= 0" }
+        ingredients = db.ingredients.find(query)
+        response = json_util.dumps(ingredients)
+        return Response(response, mimetype='application/json')
 
+@ingredientns.route('/provide')
+class provide(Resource):
+    def put(self):
+        id:str=(request.json['id'])['$oid']
+        pricebuy:float = request.json['price']
+        quantity:float=request.json['quantity']
+        TAG:str=request.json['TAG']
+        ingredientUpt = db.ingredients.find({ '_id': ObjectId(id) })
+        ingredientUpt = json_util.dumps(ingredientUpt)    
+        newquantity = json.loads(ingredientUpt)[0]["quantity"]+quantity
+        ingredient = db.ingredients.find_one_and_update({ '_id': ObjectId(id) }, { "$set":{
+            'price':pricebuy,
+            'quantity': newquantity
+        }
+        })
+        id = db.provide.insert({
+            'reference':id,
+            'TAG':TAG,
+            'price':pricebuy,
+            'quantity':quantity,
+            'created_at':datetime.now()
+        })
+        response = jsonify({'message':'Ingrediente actualizado correctamente.', "id": str(request.json['id']), "status_code": 200}) 
+        return response
 
-def provide(id:str,  pricebuy:int, quantity:float, TAG:str):
-    ingredientUpt = db.ingredients.find({ '_id': ObjectId(id) })
-    ingredientUpt = json_util.dumps(ingredientUpt)    
-    newquantity = json.loads(ingredientUpt)[0]["quantity"]+quantity
-    ingredient = db.ingredients.find_one_and_update({ '_id': ObjectId(id) }, { "$set":{
-        'price':pricebuy,
-        'quantity': newquantity
-    }
-    })
-    id = db.provide.insert({
-        'reference':id,
-        'TAG':TAG,
-        'price':pricebuy,
-        'quantity':quantity,
-        'created_at':datetime.now()
-    })
-    return ingredient
+@ingredientns.route('/gethistory')
+class get_history(Resource):
+    @ingredientns.param('toDate', 'Fecha Fin', required=True)
+    @ingredientns.param('fromDate', 'Fecha Inicio', required=True)
+    @ingredientns.param('id', required=True)
+    def get(self):
+        id:str= request.args['id']
+        fromDate:datetime = request.args['fromDate']
+        toDate:datetime = request.args['toDate']
 
-def get_history(id:str, fromDate:datetime, toDate:datetime):
-    str_date = datetime.fromisoformat(toDate) + timedelta(seconds=86399)
-    query = { "reference":id, "created_at": { "$gte": datetime.fromisoformat(fromDate), "$lt": str_date }}
-    history = db.provide.find(query)
-    return json_util.dumps(history)
+        str_date = datetime.fromisoformat(toDate) + timedelta(seconds=86399)
+        query = { "reference":id, "created_at": { "$gte": datetime.fromisoformat(fromDate), "$lt": str_date }}
+        history = db.provide.find(query)
+        return  Response(json_util.dumps(history), mimetype='application/json')
