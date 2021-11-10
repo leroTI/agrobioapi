@@ -9,10 +9,10 @@ from controllers import connect, ingredientns,products
 from dbmongo.mongoconnect import db
 
 
-bioapp = Flask(__name__)
-CORS(bioapp)
+app = Flask(__name__)
+CORS(app)
 api = Api(
-    bioapp,
+    app,
     title='Bioapi Flask',
     doc='/docs',
     prefix='/api',
@@ -27,11 +27,11 @@ api.add_namespace(products)
 #     def connect(self):
 #         return jsonify({"message":"pong!"})
 
-# @bioapp.route("/ingredients/create", methods=['POST'])
+# @app.route("/ingredients/create", methods=['POST'])
 # def create():
 #     return ingredient.create(request.json['name'], request.json['kgContainer'], request.json['price'], 0)
     
-# @bioapp.route("/ingredients/update", methods=['PUT'])
+# @app.route("/ingredients/update", methods=['PUT'])
 # def update():
 #     _ingredient = ingredient.update((request.json['id'])['$oid'],request.json['name'], request.json['kgContainer'], request.json['price'])
 #     if _ingredient:
@@ -40,7 +40,7 @@ api.add_namespace(products)
 #     else:
 #         return not_found()
 
-# @bioapp.route("/ingredients/delete/<string:id>", methods=['DELETE'])
+# @app.route("/ingredients/delete/<string:id>", methods=['DELETE'])
 # def delete(id):    
 #     _ingredient = ingredient.delete(id)
 #     if _ingredient:
@@ -49,18 +49,18 @@ api.add_namespace(products)
 #     else:
 #         return not_found()
 
-# @bioapp.route('/ingredients/getall', methods=['GET'])
+# @app.route('/ingredients/getall', methods=['GET'])
 # def get_ingredients():
 #     ingredients =  ingredient.get_ingredients()
 #     return Response(ingredients, mimetype='application/json')
 
-# @bioapp.route('/ingredients/get/<string:name>', methods=['GET'])
+# @app.route('/ingredients/get/<string:name>', methods=['GET'])
 # def get_ingredients_by_name(name):
 #     _ingredients = ingredient.get_ingredients_by_name(name)
 #     response = json_util.dumps(_ingredients)
 #     return Response(response, mimetype='application/json')
 
-# @bioapp.route("/ingredients/provide", methods=['PUT'])
+# @app.route("/ingredients/provide", methods=['PUT'])
 # def provide():
 #     _ingredient = ingredient.provide((request.json['id'])['$oid'], request.json['price'], request.json['quantity'], request.json['TAG'] )
 #     if _ingredient:
@@ -69,24 +69,26 @@ api.add_namespace(products)
 #     else:
 #         return not_found()
 
-# @bioapp.route('/ingredients/gethistory/<string:id>/<string:fromDate>/<string:toDate>', methods=['GET'])
+# @app.route('/ingredients/gethistory/<string:id>/<string:fromDate>/<string:toDate>', methods=['GET'])
 # def get_history(id, fromDate, toDate):
 #     ingredients =  ingredient.get_history(id, fromDate, toDate)
 #     print(ingredients)
 #     return Response(ingredients, mimetype='application/json')
+@app.route('/')
+def index():
+    return 'Hello from Flask'
 
-
-# @api.route('/ping')
-# class Ping(Resource):
-#     def get(self):
-#         response = jsonify({"message":"pong!"})
-#         response.status_code = 200
-#         return response
+@app.route('/ping')
+class Ping(Resource):
+    def get(self):
+        response = jsonify({"message":"pong!"})
+        response.status_code = 200
+        return response
             
 
 
 ###############################################
-@bioapp.errorhandler(404)
+@app.errorhandler(404)
 def not_found(error=None):
     response = jsonify({
         'message':'Resource Not Found: '+request.url,
@@ -97,4 +99,4 @@ def not_found(error=None):
 ##################################################
 
 if __name__ == '__main__':
-    bioapp.run(debug = True, port=4000)
+    app.run(host='0.0.0.0')
