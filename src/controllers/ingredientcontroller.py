@@ -1,3 +1,4 @@
+from cgitb import lookup
 from flask_restx import Resource, Namespace
 import json
 from datetime import datetime, timedelta
@@ -23,7 +24,7 @@ class create(Resource):
             'quantity':quantity
         })
         response = jsonify({'message':'Operación Completada', "id": str(id), "status_code": 200})
-        return Response(response, mimetype='application/json')
+        return response#Response(response, mimetype='application/json')
 
 @ingredientns.route('/update')
 class update(Resource):
@@ -105,4 +106,28 @@ class get_history(Resource):
         str_date = datetime.fromisoformat(toDate) + timedelta(seconds=86399)
         query = { "reference":id, "created_at": { "$gte": datetime.fromisoformat(fromDate), "$lt": str_date }}
         history = db.provide.find(query)
+        return  Response(json_util.dumps(history), mimetype='application/json')
+
+@ingredientns.route('/getdatehistory')
+class get_date_history(Resource):
+    @ingredientns.param('toDate', 'Fecha Fin', required=True)
+    @ingredientns.param('fromDate', 'Fecha Inicio', required=True)
+    def get(self):
+        fromDate:datetime = request.args['fromDate']
+        toDate:datetime = request.args['toDate']
+
+        str_date = datetime.fromisoformat(toDate) + timedelta(seconds=86399)
+        query = { "created_at": { "$gte": datetime.fromisoformat(fromDate), "$lt": str_date }}
+        # lookup = { "$lookup": { "from": "provide", "foreignField": "reference", "localField": "_id", "as": "provideIngredients"} }
+        # print(lookup)
+        history = json.loads(json_util.dumps(db.provide.find(query)))
+        ingredients = json.loads(json_util.dumps(db.ingredients.find()))
+        for item in history:
+            ingredient = next((ing for ing in ingredients if ing['_id']['$oid'] == item["reference"]), None)
+            item["ingredient"] = ingredient
+            print(ingredient)
+
+
+
+        # history = db.ingredients.aggregate({ "$addFields": { "_id": { "$toString": "$_id" }}},lookup)
         return  Response(json_util.dumps(history), mimetype='application/json')

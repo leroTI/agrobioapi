@@ -1,3 +1,4 @@
+from os import path
 from flask_restx import Namespace
 
 ingredientns = Namespace(
@@ -16,4 +17,22 @@ products = Namespace(
     path='/products',
     name='products',
     description='Productos'
+)
+
+sale = Namespace(
+    path='/sale',
+    name='sale',
+    description='venta de productos'
+)
+
+sesion = Namespace(
+    path='/sesion',
+    name='sesion',
+    description='Sesión'
+)
+
+client = Namespace(
+    path='/client',
+    name='client',
+    description='Clientes'
 )
