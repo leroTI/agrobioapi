@@ -10,13 +10,14 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "src/bioapp.py",
-                "FLASK_ENV": "development"
+                "FLASK_APP": "${workspaceRoot}/src/app.py",
+                "FLASK_ENV": "development",
+                "FLASK_DEBUG": "1" 
             },
             "args": [
-                "run",
-                "--no-debugger",
-                "--host=0.0.0.0"
+                "run"
+                // "--no-debugger",
+                // "--no-reload"
             ],
             "jinja": true
         }
