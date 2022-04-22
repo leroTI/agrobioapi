@@ -1,0 +1,7 @@
+prod/
+mongodbdata/
+src/dbmongo/__pycache__/
+src/controllers/__pycache__/
+src/models/_pycache__/
+
+**/_pycache__/**

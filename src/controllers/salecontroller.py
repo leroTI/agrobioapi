@@ -12,11 +12,11 @@ from bson.objectid import ObjectId
 class sellPoint(Resource):
     def post(self):        
         data = json.loads(json_util.dumps(request.json))
-        client = None
+        
         if 'client' not in data:
             client = None
         else:
-            client = request.json['client']
+            client = data["client"]
 
         id =  db.sale.insert(
             {
@@ -82,16 +82,19 @@ class payment(Resource):
 
 @sale.route('/gethistoryregion')
 class get_history_region(Resource):
-    @sale.param('toDate', 'Fecha Fin', required=True)
-    @sale.param('fromDate', 'Fecha Inicio', required=True)
+    @sale.param('to_Date', 'Fecha Fin', required=True)
+    @sale.param('from_Date', 'Fecha Inicio', required=True)
     @sale.param('id_region', required=True)
     def get(self):
         id:int=  request.args['id_region']
-        fromDate:datetime = request.args['from_date']
-        toDate:datetime = request.args['to_date']
+        fromDate:datetime = request.args['from_Date']
+        toDate:datetime = request.args['to_Date']
 
         str_date = datetime.fromisoformat(toDate) + timedelta(seconds=86399)
-        query = { "id_region": int(id), "created_at": { "$gte": datetime.fromisoformat(fromDate), "$lt": str_date }}
+        if (id == '0'):
+            query = { "created_at": { "$gte": datetime.fromisoformat(fromDate), "$lt": str_date }}
+        else:    
+            query = { "id_region": int(id), "created_at": { "$gte": datetime.fromisoformat(fromDate), "$lt": str_date }}
         
         history = db.sale.find(query)
         return  Response(json_util.dumps(history), mimetype='application/json')

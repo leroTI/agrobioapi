@@ -61,6 +61,20 @@ class provide(Resource):
         productsUpt = json.loads(productsUpt)[0]
         newinventario = 0
         productionPrice:float= 0
+
+        for item in productsUpt["ingredients"]:
+            ingredientUpt = db.ingredients.find({ '_id': ObjectId(item["id"]) })
+            ingredientUpt = json_util.dumps(ingredientUpt) 
+            ingredientUpt = json.loads(ingredientUpt)[0]
+            # productionPrice += (item["quantity"]*(item["price"]/float(item["kgContainer"])))
+            if ingredientUpt["quantity"]-item["quantity"] < 0:
+                response = jsonify({'message':'Inventario insuficiente '+ingredientUpt["name"], "id": str(id), "status_code": 400}) 
+                return response
+            # response = db.ingredients.find_one_and_update({ '_id': ObjectId(item["id"]) }, { "$set":{
+            #     'quantity': ingredientUpt["quantity"]-item["quantity"]
+            # }})
+
+
         for item in productsUpt["ingredients"]:
             ingredientUpt = db.ingredients.find({ '_id': ObjectId(item["id"]) })
             ingredientUpt = json_util.dumps(ingredientUpt) 
