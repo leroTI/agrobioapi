@@ -2,9 +2,9 @@ version: '3.7'
 
 services:
   app-service:
-    image: erikx3/frogy-agrobioapp:ts-22.01.18.1
+    image: erikx3/frogy-agrobioapp:ts-22.04.25.1
     ports:
-      - "4200:80"
+      - "80:80"
     networks:
       - frontend
   flask:
@@ -13,7 +13,7 @@ services:
     restart: always
     environment:
       - APP_NAME=AgroBioApi
-      - APP_ENV=prod"
+      - APP_ENV=prod
       - APP_DEBUG=False
     expose:
       - 4000

@@ -36,3 +36,10 @@ client = Namespace(
     name='client',
     description='Clientes'
 )
+
+
+bills = Namespace(
+    path='/bills',
+    name='bills',
+    description='Gastos'
+)

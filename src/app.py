@@ -5,8 +5,9 @@ from flask_pymongo import PyMongo, ObjectId
 from bson import json_util
 from flask_cors import CORS
 from bson.objectid import ObjectId
-from controllers import connect, ingredientns,products,sale, client, sesion
+from controllers import connect, ingredientns,products,sale, client, sesion, bills
 from dbmongo.mongoconnect import db
+from models.bill import bill
 
 
 app = Flask(__name__)
@@ -25,6 +26,7 @@ api.add_namespace(products)
 api.add_namespace(sale)
 api.add_namespace(sesion)
 api.add_namespace(client)
+api.add_namespace(bills)
 
 @app.route('/')
 def index():

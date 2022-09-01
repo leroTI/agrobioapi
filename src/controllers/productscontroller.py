@@ -85,7 +85,7 @@ class provide(Resource):
             }})
             
         for adicional in productsUpt["adicional"]:
-                productionPrice += adicional.price
+                productionPrice += adicional['price']
 
         if not (productsUpt.get('inventario') is None):
             newinventario = productsUpt["inventario"]+inventario
