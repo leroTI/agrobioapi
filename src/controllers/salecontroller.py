@@ -12,7 +12,17 @@ from bson.objectid import ObjectId
 class sellPoint(Resource):
     def post(self):        
         data = json.loads(json_util.dumps(request.json))
-        
+        id = True
+        for item in request.json['sale_products']:
+            product = db.products.find({ '_id': ObjectId(item['id']) })
+            product = json_util.dumps(product)
+            product = json.loads(product)[0]
+            if (product['inventario'] - item['cantidad']) < 0:
+                mensaje = 'El producto '+product['name']+ ' no cuenta con el inventario suficiente'
+                response = jsonify({'message':mensaje, "id": str(item['id']), "status_code": 400})
+                return response
+
+
         if 'client' not in data:
             client = None
         else:
@@ -33,6 +43,14 @@ class sellPoint(Resource):
             'outstanding_amount': float(request.json['total'])-float(request.json['payment']),
             'status': "open"
         })
+
+        for item in request.json['sale_products']:
+            product = db.products.find({ '_id': ObjectId(item['id']) })
+            product = json_util.dumps(product)
+            product = json.loads(product)[0]
+            result = db.products.find_one_and_update({ '_id': ObjectId(item['id']) }, { "$set":{
+            'inventario': product['inventario'] - item['cantidad']}})
+
 
         response = jsonify({'message':'Operación Completada', "id": str(id), "status_code": 200})
         return response#Response(response, mimetype='application/json')

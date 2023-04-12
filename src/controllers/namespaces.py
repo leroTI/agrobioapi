@@ -43,3 +43,9 @@ bills = Namespace(
     name='bills',
     description='Gastos'
 )
+
+expenses = Namespace(
+    path='/expense',
+    name='expense',
+    description='Gastos Oerativos'
+)
